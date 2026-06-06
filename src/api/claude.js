@@ -67,10 +67,13 @@ export async function analyseResume(resumeText, jobDescription) {
 }
 
 /**
- * Generate a single interview question
+ * Generate a single interview question, avoiding previously asked ones
  */
-export async function generateInterviewQuestion(role, type, difficulty, questionNumber) {
-  const userMessage = `Generate a ${difficulty} ${type} interview question for a ${role} position. This is question number ${questionNumber} in a 5-question session.`
+export async function generateInterviewQuestion(role, type, difficulty, questionNumber, previousQuestions = []) {
+  const avoidSection = previousQuestions.length > 0
+    ? `\n\nPrevious questions already asked (DO NOT repeat or rephrase these):\n${previousQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`
+    : ''
+  const userMessage = `Generate a ${difficulty} ${type} interview question for a ${role} position. This is question number ${questionNumber} of 5 in this session.${avoidSection}\n\nMake sure this question covers a different topic and concept from all previous questions above.`
   return callGroq(INTERVIEW_QUESTION_SYSTEM_PROMPT, userMessage)
 }
 

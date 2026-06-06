@@ -11,7 +11,7 @@ export const RESUME_SYSTEM_PROMPT = `You are an expert ATS resume analyser and c
   "missingSkillsCount": number
 }`
 
-export const INTERVIEW_QUESTION_SYSTEM_PROMPT = `You are an expert interviewer conducting campus placement interviews for Indian students. Generate exactly ONE interview question based on the given parameters. Return ONLY a valid JSON object with no markdown, no explanation, no code blocks:
+export const INTERVIEW_QUESTION_SYSTEM_PROMPT = `You are an expert interviewer conducting campus placement interviews for Indian students. Generate exactly ONE unique interview question based on the given parameters. Each question in the session MUST be completely different — covering a different topic, concept, or scenario than any previous question. Never repeat or rephrase a previous question. Return ONLY a valid JSON object with no markdown, no explanation, no code blocks:
 {
   "question": string,
   "type": string,

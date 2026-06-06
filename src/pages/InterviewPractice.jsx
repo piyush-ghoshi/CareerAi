@@ -36,6 +36,7 @@ export default function InterviewPractice() {
   const [answer, setAnswer] = useState('')
   const [feedback, setFeedback] = useState(null)
   const [allScores, setAllScores] = useState([])
+  const [previousQuestions, setPreviousQuestions] = useState([])
   const [phase, setPhase] = useState('setup')
   const [modelAnswerExpanded, setModelAnswerExpanded] = useState(false)
   const [loadingMsgQ, setLoadingMsgQ] = useState(LOADING_MESSAGES_Q[0])
@@ -77,8 +78,13 @@ export default function InterviewPractice() {
   async function handleGenerateQuestion() {
     questionClaude.reset(); feedbackClaude.reset()
     setFeedback(null); setAnswer(''); setModelAnswerExpanded(false); timer.reset()
-    const data = await questionClaude.run(generateInterviewQuestion, selectedRole, selectedType, selectedDifficulty, questionNumber)
-    if (data) { setCurrentQuestion(data); setPhase('question'); timer.start() }
+    const data = await questionClaude.run(generateInterviewQuestion, selectedRole, selectedType, selectedDifficulty, questionNumber, previousQuestions)
+    if (data) {
+      setCurrentQuestion(data)
+      setPreviousQuestions(prev => [...prev, data.question])
+      setPhase('question')
+      timer.start()
+    }
   }
 
   async function handleSubmitAnswer() {
@@ -100,13 +106,21 @@ export default function InterviewPractice() {
     setQuestionNumber(nextNum); setAnswer(''); setFeedback(null)
     feedbackClaude.reset(); questionClaude.reset(); setModelAnswerExpanded(false); timer.reset()
     setCurrentQuestion(null)
-    const data = await questionClaude.run(generateInterviewQuestion, selectedRole, selectedType, selectedDifficulty, nextNum)
-    if (data) { setCurrentQuestion(data); setPhase('question'); timer.start() }
+    // Pass updated previousQuestions inline — state hasn't updated yet so spread current + current question
+    const updatedPrev = currentQuestion ? [...previousQuestions, currentQuestion.question] : previousQuestions
+    const data = await questionClaude.run(generateInterviewQuestion, selectedRole, selectedType, selectedDifficulty, nextNum, updatedPrev)
+    if (data) {
+      setCurrentQuestion(data)
+      setPreviousQuestions([...updatedPrev, data.question])
+      setPhase('question')
+      timer.start()
+    }
   }
 
   function handleRestart() {
     setPhase('setup'); setQuestionNumber(1); setCurrentQuestion(null)
     setAnswer(''); setFeedback(null); setAllScores([]); setModelAnswerExpanded(false)
+    setPreviousQuestions([])
     timer.reset(); questionClaude.reset(); feedbackClaude.reset()
   }
 
